@@ -3,7 +3,7 @@ from astrbot.api.platform import AstrBotMessage, PlatformMetadata, MessageType
 from astrbot.api.message_components import Plain, Image, Reply, At
 from telegram.ext import ExtBot
 
-class TelegramPlatformEvent(AstrMessageEvent):
+class BalePlatformEvent(AstrMessageEvent):
     def __init__(self, message_str: str, message_obj: AstrBotMessage, platform_meta: PlatformMetadata, session_id: str, client: ExtBot):
         super().__init__(message_str, message_obj, platform_meta, session_id)
         self.client = client

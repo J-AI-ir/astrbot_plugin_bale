@@ -12,19 +12,19 @@ from telegram import Update, File
 from telegram.ext import ApplicationBuilder, ContextTypes, filters
 from telegram.constants import ChatType
 from telegram.ext import MessageHandler as TelegramMessageHandler
-from .tg_message_event import TelegramPlatformEvent
+from .bale_message_event import BalePlatformEvent
 
 if sys.version_info >= (3, 12):
     from typing import override
 else:
     from typing_extensions import override
 
-@register_platform_adapter("telegram", "telegram 适配器", default_config_tmpl={
-    "telegram_token": "your_token",
+@register_platform_adapter("bale", "bale 适配器", default_config_tmpl={
+    "bale_token": "your_token",
     "start_message": "Hello, I'm AstrBot!",
-    "提示": "由于 Telegram 无法在中国大陆访问，如果你的网络环境为中国大陆，记得在 `其他配置` 处设置代理！"
+    "提示": "由于 Bale 无法在中国大陆访问，如果你的网络环境为中国大陆，记得在 `其他配置` 处设置代理！"
 })
-class TelegramPlatformAdapter(Platform):
+class BalePlatformAdapter(Platform):
 
     def __init__(self, platform_config: dict, platform_settings: dict, event_queue: asyncio.Queue) -> None:
         super().__init__(event_queue)
@@ -35,19 +35,19 @@ class TelegramPlatformAdapter(Platform):
     @override
     async def send_by_session(self, session: MessageSesion, message_chain: MessageChain):
         from_username = session.session_id
-        await TelegramPlatformEvent.send_with_client(self.client, message_chain, from_username)
+        await BalePlatformEvent.send_with_client(self.client, message_chain, from_username)
         await super().send_by_session(session, message_chain)
     
     @override
     def meta(self) -> PlatformMetadata:
         return PlatformMetadata(
-            "telegram",
-            "telegram 适配器",
+            "bale",
+            "bale 适配器",
         )
 
     @override
     async def run(self):
-        self.application = ApplicationBuilder().token(self.config['telegram_token']).build()
+        self.application = ApplicationBuilder().token(self.config['bale_token']).base_url('https://tapi.bale.ai/bot').build()
         message_handler = TelegramMessageHandler(
             filters=None,
             callback=self.convert_message
@@ -57,7 +57,7 @@ class TelegramPlatformAdapter(Platform):
         await self.application.start()
         queue = self.application.updater.start_polling()
         self.client = self.application.bot
-        print("Telegram Platform Adapter is running.")
+        print("Bale Platform Adapter is running.")
         await queue
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -91,7 +91,7 @@ class TelegramPlatformAdapter(Platform):
         await self.handle_msg(message)
     
     async def handle_msg(self, message: AstrBotMessage):
-        message_event = TelegramPlatformEvent(
+        message_event = BalePlatformEvent(
             message_str=message.message_str,
             message_obj=message,
             platform_meta=self.meta(),
